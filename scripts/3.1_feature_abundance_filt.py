@@ -59,7 +59,7 @@ if __name__ == '__main__':
         output_path = '../tables/fastp_hg38_t2t_pangenome_193238_feature-table_rare_ab-filt.biom'
         
         # Filter features
-        save_as_biom(feature_abundance_filt(biom_path, 0.1), output_path)
+        save_as_biom(feature_abundance_filt(biom_path, 0.05), output_path)
         logging.info("Script completed successfully.")
 
     except Exception as e:

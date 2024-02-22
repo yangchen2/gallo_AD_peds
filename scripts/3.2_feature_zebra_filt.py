@@ -6,7 +6,7 @@ import qiime2 as q2
 import logging
 
 # Setup logging
-logging.basicConfig(filename='../logs/feature_zebra_filt.log', level=logging.INFO,
+logging.basicConfig(filename='../logs/3.2_feature_zebra_filt.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -27,7 +27,7 @@ def feature_abundance_filt(biom_path: str, zebra_coverage_path: str, zebra_thres
     # Load in BIOM file and convert to pandas df
     logging.info("Step 1: Loading in biom table and converting to pandas df")
     biom_table = load_table(biom_path)
-    df = pd.DataFrame(biom_table.to_dataframe().transpose())
+    df = pd.DataFrame(biom_table.to_dataframe())#.transpose())
     logging.info(f"Table shape: {df.shape}")
 
     # Load in zebra coverages file
@@ -40,14 +40,14 @@ def feature_abundance_filt(biom_path: str, zebra_coverage_path: str, zebra_thres
     zebra_coverage_sorted.to_csv('../zebra_coverage/zebra_coverage_sorted.tsv') 
 
     logging.info("Step 3: Filtering df based on the coverage percentage condition")
-    # Create a boolean mask where True represents rows with coverage >= 10.00%
+    # Create a boolean mask where True represents rows with coverage >= zebra_threshold%
     coverage_mask = zebra_coverage_sorted['coverage %'] >= zebra_threshold
     # Use the mask to filter 'zebra_coverage_sorted' first to get the list of Feature OTUs meeting the condition
     filtered_features = zebra_coverage_sorted[coverage_mask].index
     # Now, filter 'df' to keep only the rows where the Feature OTUs are in 'filtered_features'  
     filtered_df = df[df.index.isin(filtered_features)]
     logging.info(f"Table shape after zebra filtering: {filtered_df.shape}")
-    filtered_df = filtered_df.transpose()
+    # filtered_df = filtered_df.transpose()
     
     logging.info("Step 4: Saving filtered table as a new BIOM file")
     table = biom.table.Table(filtered_df.values, observation_ids=filtered_df.index, sample_ids=filtered_df.columns)
@@ -59,12 +59,18 @@ def feature_abundance_filt(biom_path: str, zebra_coverage_path: str, zebra_thres
 
 if __name__ == '__main__':
     try:
-        biom_path = '../tables/fastp_hg38_t2t_pangenome_193238_feature-table_rare.biom'
-        zebra_coverage_path = '../zebra_coverage/coverage_percentage.txt'
-        filtered_biom_path = '../tables/fastp_hg38_t2t_pangenome_193238_feature-table_rare_zebra-filt.biom'
-        
+        # Paths for wol2 per-genome table
+        # biom_path = '../tables/tables_woltka/per_genome/fastp_hg38_t2t_pangenome_193238_feature-table.biom'
+        # zebra_coverage_path = '../zebra_coverage/woltka_coverages/coverage_percentage.txt'
+        # filtered_biom_path = '../tables/tables_woltka/per_genome/fastp_hg38_t2t_pangenome_193238_feature-table_zebra-filt.biom'
+
+        # Paths for rs210 per-genome table
+        biom_path = '../tables/tables_rs210/per_genome/fastp_hg38_t2t_pangenome_193234_feature-table_rare.biom'
+        zebra_coverage_path = '../zebra_coverage/rs210_coverages/coverage_percentage.txt'
+        filtered_biom_path = '../tables/tables_rs210/per_genome/fastp_hg38_t2t_pangenome_193234_feature-table_rare_zebra-filt.biom'
+
         # Filter features
-        feature_abundance_filt(biom_path, zebra_coverage_path, 10.0, filtered_biom_path)
+        feature_abundance_filt(biom_path, zebra_coverage_path, 10, filtered_biom_path)
         logging.info("Script completed successfully.")
 
     except Exception as e:
