@@ -20,7 +20,7 @@ def group_by_taxonomy_levels(biom_path: str, taxonomy_path: str, input_filter_ty
     input_filter_type (str): A toggle for whether the input is the abundance filtered table or the zebra filtered table
 
     Returns:
-    dict: A dictionary containing dataframes collapsed at each of 7 taxonomy levels.
+    dict: A dictionary containing dataframes collapsed at each of 8 taxonomy levels.
     """
 
     logging.info("STEP 1: Converting BIOM to dataframe.")
@@ -32,22 +32,19 @@ def group_by_taxonomy_levels(biom_path: str, taxonomy_path: str, input_filter_ty
     grouped_dfs = {}
 
     logging.info("STEP 2: Attaching taxonomy info and collapsing by taxonomy level.")
-    # Load in wol2 taxonomy file
-    wol_taxonomy = pd.read_csv(taxonomy_path, sep='\t', header=None).set_index(0)
-    wol_taxonomy.index.name = None
-    wol_taxonomy.rename(columns={wol_taxonomy.columns[0]: 'Taxonomy'}, inplace=True)
+    # Load in ref taxonomy file
+    ref_taxonomy = pd.read_csv(taxonomy_path, sep='\t', header=None).set_index(0)
+    ref_taxonomy.index.name = None
+    ref_taxonomy.rename(columns={ref_taxonomy.columns[0]: 'Taxonomy'}, inplace=True)
 
-    taxonomy_levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+    taxonomy_levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species', 'Species-gOTU']
     for level in taxonomy_levels:
             # Split Taxon column based on ';'
-            wol_taxonomy[taxonomy_levels] = wol_taxonomy['Taxonomy'].str.split(';', expand=True)
+            ref_taxonomy[taxonomy_levels] = ref_taxonomy['Taxonomy'].str.split(';', expand=True)
     logging.info(f"Taxonomy loaded")
 
     # Merge taxonomy column based on common index
-    df = df.merge(wol_taxonomy, how='left', left_index=True, right_index=True)
-
-    # Define all taxonomy levels
-    taxonomy_levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+    df = df.merge(ref_taxonomy, how='left', left_index=True, right_index=True)
 
     logging.info("STEP 3: Dataframes collapsed by taxonomy level.")
     # Loop through each taxonomy level and perform grouping
@@ -86,7 +83,7 @@ if __name__ == '__main__':
         biom_path_zebra ='../tables/tables_rs210/per_genome/fastp_hg38_t2t_pangenome_193234_feature-table_rare_zebra-filt.biom'
 
         # taxonomy_path = '../taxon_references/wol2_refs/lineages.txt'
-        taxonomy_path = '../taxon_references/rs210_refs/RS210.tax'
+        taxonomy_path = '../taxon_references/rs210_refs/RS210_species-gOTU.tax'
 
         # Create collapsed taxa BIOMs
         # logging.info("-----> Performing script with abundance filtered input.")
