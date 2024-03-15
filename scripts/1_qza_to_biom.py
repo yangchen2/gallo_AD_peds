@@ -6,7 +6,7 @@ import qiime2 as q2
 import logging
 
 # Set up logging
-logging.basicConfig(filename='../logs/qza_to_biom.log', level=logging.INFO,
+logging.basicConfig(filename='../logs/1_qza_to_biom.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -39,11 +39,14 @@ def qza_to_biom(qza_path: str):
 
 if __name__ == '__main__':
     try:
-        # Define file path to qza table
-        biom_path = '../tables/fastp_hg38_t2t_pangenome_193238_feature-table.qza'
+        # Path for wol2 per-genome table
+        # qza_path = '../tables/tables_woltka/per_genome/fastp_hg38_t2t_pangenome_193238_feature-table.qza'
         
+        # Path for rs210 per-genome table
+        qza_path = '../tables/tables_rs210/per_genome/fastp_hg38_t2t_pangenome_193234_feature-table.qza'
+
         # Convert
-        qza_to_biom(biom_path)
+        qza_to_biom(qza_path)
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")

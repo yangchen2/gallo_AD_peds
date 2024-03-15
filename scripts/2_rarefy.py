@@ -7,7 +7,7 @@ from numpy.random import RandomState
 import logging
 
 # Setup logging
-logging.basicConfig(filename='../logs/rarefy.log', level=logging.INFO,
+logging.basicConfig(filename='../logs/2_rarefy.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_and_convert_biom(biom_path: str):
@@ -44,7 +44,7 @@ def rarefy_table(biom_df: pd.DataFrame, seed: int = 42) -> pd.DataFrame:
     """
     # Calculate minimum sampling depth
     # min_depth = biom_df.sum(axis=1).min().astype(int)
-    min_depth = 1000 # Set min depth to 1000
+    min_depth = 5000 # Set min depth to 1000
     logging.info(f"Minimum sampling depth: {min_depth}")
 
     # Rarefaction process
@@ -71,6 +71,7 @@ def save_as_biom(df: pd.DataFrame, output_path: str):
     df (pd.DataFrame): The DataFrame to save.
     output_path (str): Path to the output BIOM file.
     """
+    df = df.transpose()
     table = biom.table.Table(df.values, observation_ids=df.index, sample_ids=df.columns)
     with biom_open(output_path, 'w') as f:
         table.to_hdf5(f, "rarefaction script")
@@ -78,9 +79,14 @@ def save_as_biom(df: pd.DataFrame, output_path: str):
 
 if __name__ == '__main__':
     try:
-        biom_path = '../tables/fastp_hg38_t2t_pangenome_193238_feature-table.biom'
-        output_path = '../tables/fastp_hg38_t2t_pangenome_193238_feature-table_rare.biom'
-        
+        # Paths for wol2 per-genome table
+        # biom_path = '../tables/tables_woltka/per_genome/fastp_hg38_t2t_pangenome_193238_feature-table.biom'
+        # output_path = '../tables/tables_woltka/per_genome/fastp_hg38_t2t_pangenome_193238_feature-table_rare.biom' 
+
+        # Paths for rs210 per-genome table
+        biom_path = '../tables/tables_rs210/per_genome/fastp_hg38_t2t_pangenome_193234_feature-table.biom'
+        output_path = '../tables/tables_rs210/per_genome/fastp_hg38_t2t_pangenome_193234_feature-table_rare.biom'
+
         df = read_and_convert_biom(biom_path)
         rarefied_df = rarefy_table(df)
         save_as_biom(rarefied_df, output_path)
